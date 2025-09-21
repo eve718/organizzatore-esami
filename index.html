@@ -754,6 +754,13 @@
             const syncIcon = document.getElementById('sync-icon');
             const syncMessage = document.getElementById('sync-message');
 
+            if (typeof Dropbox === 'undefined') {
+                console.error('Dropbox SDK non caricato correttamente');
+                updateSyncStatus('Errore: Dropbox non disponibile', 'error');
+            } else {
+                console.log('Dropbox SDK caricato correttamente');
+            }
+
             // All'avvio, se abbiamo una chiave, usiamola per inizializzare Dropbox
             if (userDropboxAppKey) {
                 // Inizializza Dropbox con la chiave salvata
@@ -1043,15 +1050,25 @@
 
             // Funzione per inizializzare Dropbox
             function initializeDropbox(token) {
-                dbx = new Dropbox.Dropbox({ accessToken: token });
+                try {
+                    // Usa la sintassi corretta per le versioni più recenti dell'SDK
+                    dbx = new Dropbox({ accessToken: token });
+                    console.log("Dropbox inizializzato correttamente");
 
-                // Carica i dati da Dropbox all'avvio
-                loadFromDropbox();
+                    // Carica i dati da Dropbox all'avvio
+                    loadFromDropbox();
+                } catch (error) {
+                    console.error("Errore nell'inizializzazione di Dropbox:", error);
+                    updateSyncStatus('Errore di connessione a Dropbox', 'error');
+                }
             }
 
             // Funzione per caricare i dati da Dropbox
             function loadFromDropbox() {
-                if (!dbx) return;
+                if (!dbx) {
+                    updateSyncStatus('Dropbox non inizializzato', 'error');
+                    return;
+                }
 
                 updateSyncStatus('Sincronizzazione in corso...', 'syncing');
 
@@ -1088,7 +1105,10 @@
 
             // Funzione per sincronizzare con Dropbox
             function syncWithDropbox() {
-                if (!dbx) return;
+                if (!dbx) {
+                    updateSyncStatus('Dropbox non inizializzato', 'error');
+                    return;
+                }
 
                 updateSyncStatus('Sincronizzazione in corso...', 'syncing');
 
