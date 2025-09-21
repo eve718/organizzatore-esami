@@ -123,15 +123,6 @@
             background-color: #e67e22;
         }
 
-        .btn-dropbox {
-            background-color: #0061ff;
-            color: white;
-        }
-
-        .btn-dropbox:hover {
-            background-color: #004aca;
-        }
-
         .card {
             background: white;
             border-radius: 10px;
@@ -419,40 +410,6 @@
         .exam-actions button {
             flex: 1;
         }
-
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-
-        .sync-status .icon {
-            font-size: 1.2rem;
-        }
-
-        .sync-status.syncing {
-            color: #f39c12;
-        }
-
-        .sync-status.success {
-            color: #2ecc71;
-        }
-
-        .sync-status.error {
-            color: #e74c3c;
-        }
-
-        #dropbox-help-link {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        #dropbox-help-link:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 
@@ -463,17 +420,10 @@
             <h1>Organizzatore Esami Universitari</h1>
         </div>
         <div class="controls">
-            <button class="btn-dropbox" id="dropbox-auth-btn"><i class="fab fa-dropbox"></i> Connetti Dropbox</button>
-            <button class="btn-secondary" id="config-btn"><i class="fas fa-cog"></i> Configura</button>
             <button class="btn-primary" id="export-btn"><i class="fas fa-download"></i> Esporta Dati</button>
             <button class="btn-success" id="import-btn"><i class="fas fa-upload"></i> Importa Dati</button>
         </div>
     </header>
-
-    <div class="sync-status" id="sync-status">
-        <i class="fas fa-cloud icon" id="sync-icon"></i>
-        <span id="sync-message">Non connesso a Dropbox</span>
-    </div>
 
     <main>
         <div class="card">
@@ -695,36 +645,12 @@
         </div>
     </div>
 
-    <!-- Modale Configurazione -->
-    <div class="modal" id="config-modal">
-        <div class="modal-content">
-            <h2><i class="fas fa-cog"></i> Configurazione Sincronizzazione</h2>
-            <div class="form-group">
-                <label for="dropbox-app-key">La tua Dropbox App Key</label>
-                <input type="text" id="dropbox-app-key" placeholder="Inserisci la tua App Key">
-                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                    <a href="#" id="dropbox-help-link">Come ottenere la App Key</a>
-                </p>
-            </div>
-            <div class="form-group">
-                <button class="btn-primary" id="save-config-btn">Salva Configurazione</button>
-                <button class="btn-secondary" id="close-config-modal">Annulla</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Includi Dropbox SDK -->
-    <script src="https://unpkg.com/dropbox@2.5.13/dist/Dropbox-sdk.min.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Inizializzazione variabili
             let exams = JSON.parse(localStorage.getItem('exams')) || [];
             let currentDates = [];
             let editingExamId = null;
-            let dropboxAccessToken = localStorage.getItem('dropboxAccessToken'); // Aggiungi questa linea
-            let dbx = null;
-            let userDropboxAppKey = localStorage.getItem('userDropboxAppKey') || '';
 
             const examList = document.getElementById('exam-list');
             const saveExamBtn = document.getElementById('save-exam-btn');
@@ -732,7 +658,6 @@
             const addDateBtn = document.getElementById('add-date-btn');
             const exportBtn = document.getElementById('export-btn');
             const importBtn = document.getElementById('import-btn');
-            const dropboxAuthBtn = document.getElementById('dropbox-auth-btn');
             const closeExportModal = document.getElementById('close-export-modal');
             const exportModal = document.getElementById('export-modal');
             const importModal = document.getElementById('import-modal');
@@ -750,57 +675,6 @@
             const importWarning = document.getElementById('import-warning');
             const importWarningText = document.getElementById('import-warning-text');
             const formTitle = document.getElementById('form-title');
-            const syncStatus = document.getElementById('sync-status');
-            const syncIcon = document.getElementById('sync-icon');
-            const syncMessage = document.getElementById('sync-message');
-
-            if (typeof Dropbox === 'undefined') {
-                console.error('Dropbox SDK non caricato correttamente');
-                updateSyncStatus('Errore: Dropbox non disponibile', 'error');
-            } else {
-                console.log('Dropbox SDK caricato correttamente');
-            }
-
-            // All'avvio, se abbiamo una chiave, usiamola per inizializzare Dropbox
-            if (userDropboxAppKey) {
-                // Inizializza Dropbox con la chiave salvata
-                initializeDropbox(userDropboxAppKey);
-            }
-
-            // Apri modale configurazione
-            document.getElementById('config-btn').addEventListener('click', function () {
-                document.getElementById('dropbox-app-key').value = userDropboxAppKey;
-                document.getElementById('config-modal').classList.add('show');
-            });
-
-            // Chiudi modale configurazione
-            document.getElementById('close-config-modal').addEventListener('click', function () {
-                document.getElementById('config-modal').classList.remove('show');
-            });
-
-            // Salva configurazione
-            document.getElementById('save-config-btn').addEventListener('click', function () {
-                const appKey = document.getElementById('dropbox-app-key').value.trim();
-                if (appKey) {
-                    userDropboxAppKey = appKey;
-                    localStorage.setItem('userDropboxAppKey', appKey);
-                    alert('Configurazione salvata! Ora puoi connetterti a Dropbox.');
-                    document.getElementById('config-modal').classList.remove('show');
-
-                    // Riinizializza Dropbox con la nuova chiave
-                    if (dbx) {
-                        initializeDropbox(appKey);
-                    }
-                } else {
-                    alert('Inserisci una App Key valida.');
-                }
-            });
-
-            // Aiuto per ottenere la App Key
-            document.getElementById('dropbox-help-link').addEventListener('click', function (e) {
-                e.preventDefault();
-                alert("Per ottenere la tua App Key:\n1. Vai su https://www.dropbox.com/developers/apps\n2. Clicca 'Create App'\n3. Scegli 'Scoped Access' > 'Full Dropbox'\n4. Inserisci un nome per la tua app\n5. Copia la 'App Key' e incollala qui");
-            });
 
             // Gestione tabs
             document.querySelectorAll('.tab-btn').forEach(button => {
@@ -828,25 +702,6 @@
             // Carica gli esami all'avvio
             renderExams();
             checkForConflicts();
-
-            // Autenticazione Dropbox
-            dropboxAuthBtn.addEventListener('click', function () {
-                // Ottieni il token dall'localStorage invece di usare la variabile globale
-                const currentAccessToken = localStorage.getItem('dropboxAccessToken');
-
-                if (currentAccessToken) {
-                    // Disconnetti
-                    localStorage.removeItem('dropboxAccessToken');
-                    dbx = null;
-                    updateSyncStatus('Disconnesso da Dropbox', 'error');
-                    this.innerHTML = '<i class="fab fa-dropbox"></i> Connetti Dropbox';
-                    // Ricarica la pagina per pulire eventuali stati residui
-                    setTimeout(() => { location.reload(); }, 1000);
-                } else {
-                    // Connetti
-                    authenticateDropbox();
-                }
-            });
 
             // Aggiungi data all'esame
             addDateBtn.addEventListener('click', function () {
@@ -908,11 +763,6 @@
                 checkForConflicts();
                 resetForm();
                 cancelEdit();
-
-                // Sincronizza con Dropbox
-                if (dbx) {
-                    syncWithDropbox();
-                }
             });
 
             // Annulla modifica
@@ -979,11 +829,6 @@
                         checkForConflicts();
                         importModal.classList.remove('show');
                         alert('Dati importati con successo!');
-
-                        // Sincronizza con Dropbox
-                        if (dbx) {
-                            syncWithDropbox();
-                        }
                     } else {
                         throw new Error('Formato dati non valido');
                     }
@@ -1013,11 +858,6 @@
                             checkForConflicts();
                             importModal.classList.remove('show');
                             alert('Dati importati con successo!');
-
-                            // Sincronizza con Dropbox
-                            if (dbx) {
-                                syncWithDropbox();
-                            }
                         } else {
                             throw new Error('Formato dati non valido');
                         }
@@ -1031,123 +871,6 @@
 
             // Applica ordinamento
             applySortBtn.addEventListener('click', renderExams);
-
-            // Funzione per autenticazione Dropbox
-            function authenticateDropbox() {
-                if (!userDropboxAppKey) {
-                    alert('Prima configura la tua App Key nel pannello di configurazione.');
-                    document.getElementById('config-modal').classList.add('show');
-                    return;
-                }
-
-                const authUrl = 'https://www.dropbox.com/oauth2/authorize?' +
-                    'client_id=' + userDropboxAppKey +
-                    '&response_type=token' +
-                    '&redirect_uri=' + encodeURIComponent(window.location.href.split('?')[0]);
-
-                window.location.href = authUrl;
-            }
-
-            // Funzione per inizializzare Dropbox
-            function initializeDropbox(token) {
-                try {
-                    // Usa la sintassi corretta per le versioni più recenti dell'SDK
-                    dbx = new Dropbox({ accessToken: token });
-                    console.log("Dropbox inizializzato correttamente");
-
-                    // Carica i dati da Dropbox all'avvio
-                    loadFromDropbox();
-                } catch (error) {
-                    console.error("Errore nell'inizializzazione di Dropbox:", error);
-                    updateSyncStatus('Errore di connessione a Dropbox', 'error');
-                }
-            }
-
-            // Funzione per caricare i dati da Dropbox
-            function loadFromDropbox() {
-                if (!dbx) {
-                    updateSyncStatus('Dropbox non inizializzato', 'error');
-                    return;
-                }
-
-                updateSyncStatus('Sincronizzazione in corso...', 'syncing');
-
-                dbx.filesDownload({ path: '/esami-universitari.json' })
-                    .then(function (response) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            try {
-                                const data = JSON.parse(e.target.result);
-                                if (Array.isArray(data)) {
-                                    exams = data;
-                                    saveExams();
-                                    renderExams();
-                                    checkForConflicts();
-                                    updateSyncStatus('Dati sincronizzati con Dropbox', 'success');
-                                }
-                            } catch (error) {
-                                console.error('Errore nel parsing dei dati da Dropbox:', error);
-                                updateSyncStatus('Errore nei dati di Dropbox', 'error');
-                            }
-                        };
-                        reader.readAsText(response.fileBlob);
-                    })
-                    .catch(function (error) {
-                        if (error.status === 409) {
-                            // File non trovato, ne creeremo uno nuovo al prossimo salvataggio
-                            updateSyncStatus('Pronto per sincronizzare', 'success');
-                        } else {
-                            console.error('Errore nel caricamento da Dropbox:', error);
-                            updateSyncStatus('Errore di connessione a Dropbox', 'error');
-                        }
-                    });
-            }
-
-            // Funzione per sincronizzare con Dropbox
-            function syncWithDropbox() {
-                if (!dbx) {
-                    updateSyncStatus('Dropbox non inizializzato', 'error');
-                    return;
-                }
-
-                updateSyncStatus('Sincronizzazione in corso...', 'syncing');
-
-                const dataStr = JSON.stringify(exams, null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-
-                dbx.filesUpload({
-                    path: '/esami-universitari.json',
-                    contents: blob,
-                    mode: { '.tag': 'overwrite' }
-                })
-                    .then(function (response) {
-                        updateSyncStatus('Dati sincronizzati con Dropbox', 'success');
-                    })
-                    .catch(function (error) {
-                        console.error('Errore nel salvataggio su Dropbox:', error);
-                        updateSyncStatus('Errore di sincronizzazione', 'error');
-                    });
-            }
-
-            // Funzione per aggiornare lo stato della sincronizzazione
-            function updateSyncStatus(message, status) {
-                syncMessage.textContent = message;
-                syncStatus.className = 'sync-status ' + status;
-
-                switch (status) {
-                    case 'syncing':
-                        syncIcon.className = 'fas fa-sync-alt icon fa-spin';
-                        break;
-                    case 'success':
-                        syncIcon.className = 'fas fa-check-circle icon';
-                        break;
-                    case 'error':
-                        syncIcon.className = 'fas fa-exclamation-triangle icon';
-                        break;
-                    default:
-                        syncIcon.className = 'fas fa-cloud icon';
-                }
-            }
 
             // Funzione per visualizzare gli esami
             function renderExams() {
@@ -1408,11 +1131,6 @@
                         cancelEdit();
                         resetForm();
                     }
-
-                    // Sincronizza con Dropbox
-                    if (dbx) {
-                        syncWithDropbox();
-                    }
                 }
             };
 
@@ -1420,31 +1138,6 @@
                 currentDates.splice(index, 1);
                 renderDatesList();
             };
-
-            // Gestione del token di accesso di Dropbox dall'URL
-            function getAccessTokenFromUrl() {
-                const hashParams = window.location.hash.substring(1).split('&');
-                for (const param of hashParams) {
-                    const [key, value] = param.split('=');
-                    if (key === 'access_token') {
-                        return decodeURIComponent(value);
-                    }
-                }
-                return null;
-            }
-
-            // Verifica se c'è un token di accesso nell'URL (dopo il reindirizzamento di OAuth)
-            const accessToken = getAccessTokenFromUrl();
-            if (accessToken) {
-                dropboxAccessToken = accessToken;
-                localStorage.setItem('dropboxAccessToken', accessToken);
-                initializeDropbox(accessToken);
-                updateSyncStatus('Connesso a Dropbox', 'success');
-                dropboxAuthBtn.innerHTML = '<i class="fab fa-dropbox"></i> Disconnetti Dropbox';
-
-                // Rimuovi il token dall'URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
         });
     </script>
 
