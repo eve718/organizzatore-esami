@@ -722,6 +722,7 @@
             let exams = JSON.parse(localStorage.getItem('exams')) || [];
             let currentDates = [];
             let editingExamId = null;
+            let dropboxAccessToken = localStorage.getItem('dropboxAccessToken'); // Aggiungi questa linea
             let dbx = null;
             let userDropboxAppKey = localStorage.getItem('userDropboxAppKey') || '';
 
@@ -823,13 +824,17 @@
 
             // Autenticazione Dropbox
             dropboxAuthBtn.addEventListener('click', function () {
-                if (dropboxAccessToken) {
+                // Ottieni il token dall'localStorage invece di usare la variabile globale
+                const currentAccessToken = localStorage.getItem('dropboxAccessToken');
+
+                if (currentAccessToken) {
                     // Disconnetti
                     localStorage.removeItem('dropboxAccessToken');
-                    dropboxAccessToken = null;
                     dbx = null;
                     updateSyncStatus('Disconnesso da Dropbox', 'error');
                     this.innerHTML = '<i class="fab fa-dropbox"></i> Connetti Dropbox';
+                    // Ricarica la pagina per pulire eventuali stati residui
+                    setTimeout(() => { location.reload(); }, 1000);
                 } else {
                     // Connetti
                     authenticateDropbox();
