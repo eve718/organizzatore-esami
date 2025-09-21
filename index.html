@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizzatore Esami Universitari</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --written: #e74c3c;
+            --oral: #2ecc71;
+            --both: #f39c12;
+            --exoneration: #9b59b6;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+            --light-text: #ecf0f1;
+            --border: #ddd;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.8rem;
+            color: var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-dropbox {
+            background-color: #0061ff;
+            color: white;
+        }
+
+        .btn-dropbox:hover {
+            background-color: #004aca;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        select,
+        input,
+        textarea {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .exam-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exam-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .exam-card {
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .written {
+            border-left: 6px solid var(--written);
+        }
+
+        .oral {
+            border-left: 6px solid var(--oral);
+        }
+
+        .both {
+            border-left: 6px solid var(--both);
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .exam-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .exam-cfu {
+            background-color: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .exam-details {
+            margin-bottom: 15px;
+        }
+
+        .exam-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+
+        .exam-detail i {
+            width: 20px;
+            color: var(--primary);
+        }
+
+        .exam-dates {
+            margin-top: 15px;
+        }
+
+        .date-badge {
+            display: inline-block;
+            background-color: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px 5px 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .exoneration-badge {
+            background-color: var(--exoneration);
+            color: white;
+        }
+
+        .conflict-warning {
+            background-color: #ff7979;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .conflict-warning.show {
+            display: block;
+        }
+
+        .sorting-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .sort-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .filters,
+            .exam-form {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-list {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .date-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .date-input-group input {
+            flex: 1;
+        }
+
+        .add-date-btn {
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dates-list {
+            margin-top: 10px;
+        }
+
+        .tab-container {
+            margin: 20px 0;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .exam-actions button {
+            flex: 1;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .sync-status .icon {
+            font-size: 1.2rem;
+        }
+
+        .sync-status.syncing {
+            color: #f39c12;
+        }
+
+        .sync-status.success {
+            color: #2ecc71;
+        }
+
+        .sync-status.error {
+            color: #e74c3c;
+        }
+
+        #dropbox-help-link {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        #dropbox-help-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Organizzatore Esami Universitari</h1>
+        </div>
+        <div class="controls">
+            <button class="btn-dropbox" id="dropbox-auth-btn"><i class="fab fa-dropbox"></i> Connetti Dropbox</button>
+            <button class="btn-secondary" id="config-btn"><i class="fas fa-cog"></i> Configura</button>
+            <button class="btn-primary" id="export-btn"><i class="fas fa-download"></i> Esporta Dati</button>
+            <button class="btn-success" id="import-btn"><i class="fas fa-upload"></i> Importa Dati</button>
+        </div>
+    </header>
+
+    <div class="sync-status" id="sync-status">
+        <i class="fas fa-cloud icon" id="sync-icon"></i>
+        <span id="sync-message">Non connesso a Dropbox</span>
+    </div>
+
+    <main>
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> <span id="form-title">Aggiungi Nuovo Esame</span></h2>
+            <div class="exam-form">
+                <div class="form-group">
+                    <label for="exam-name">Nome Esame</label>
+                    <input type="text" id="exam-name" placeholder="Es. Analisi Matematica">
+                </div>
+
+                <div class="form-group">
+                    <label for="exam-semester">Semestre</label>
+                    <select id="exam-semester">
+                        <option value="1">Primo Semestre</option>
+                        <option value="2">Secondo Semestre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="exam-cfu">CFU</label>
+                    <input type="number" id="exam-cfu" min="1" max="30" placeholder="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="exam-type">Modalità Esame</label>
+                    <select id="exam-type">
+                        <option value="written">Solo Scritto</option>
+                        <option value="oral">Solo Orale</option>
+                        <option value="both">Scritto + Orale</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="exam-exoneration">Esoneri</label>
+                    <select id="exam-exoneration">
+                        <option value="0">No Esoneri</option>
+                        <option value="1">1 Esonero</option>
+                        <option value="2">2 Esoneri</option>
+                        <option value="3">3 Esoneri</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="exam-notes">Note</label>
+                    <input type="text" id="exam-notes" placeholder="Note aggiuntive">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="exam-dates">Date Appelli</label>
+                <div class="date-input-group">
+                    <input type="date" id="exam-date-input">
+                    <button class="add-date-btn" id="add-date-btn">Aggiungi Data</button>
+                </div>
+                <div class="dates-list" id="dates-list"></div>
+            </div>
+
+            <div class="exam-actions">
+                <button class="btn-primary" id="save-exam-btn">Aggiungi Esame</button>
+                <button class="btn-secondary" id="cancel-edit-btn" style="display: none;">Annulla Modifica</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-filter"></i> Filtri</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filter-semester">Semestre</label>
+                    <select id="filter-semester">
+                        <option value="all">Tutti</option>
+                        <option value="1">Primo Semestre</option>
+                        <option value="2">Secondo Semestre</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-exoneration">Esoneri</label>
+                    <select id="filter-exoneration">
+                        <option value="all">Tutti</option>
+                        <option value="yes">Con Esoneri</option>
+                        <option value="no">Senza Esoneri</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-type">Modalità</label>
+                    <select id="filter-type">
+                        <option value="all">Tutte</option>
+                        <option value="written">Solo Scritto</option>
+                        <option value="oral">Solo Orale</option>
+                        <option value="both">Scritto + Orale</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-cfu">CFU (minimo)</label>
+                    <input type="number" id="filter-cfu" min="0" value="0">
+                </div>
+            </div>
+
+            <h2 style="margin-top: 20px;"><i class="fas fa-sort"></i> Ordina</h2>
+            <div class="sorting-options">
+                <div class="sort-group">
+                    <label for="sort-primary">Primario:</label>
+                    <select id="sort-primary">
+                        <option value="name">Nome</option>
+                        <option value="date">Data Appello</option>
+                        <option value="cfu">CFU</option>
+                    </select>
+                </div>
+
+                <div class="sort-group">
+                    <label for="sort-secondary">Secondario:</label>
+                    <select id="sort-secondary">
+                        <option value="none">Nessuno</option>
+                        <option value="name">Nome</option>
+                        <option value="date">Data Appello</option>
+                        <option value="cfu">CFU</option>
+                    </select>
+                </div>
+
+                <div class="sort-group">
+                    <label for="sort-order">Ordine:</label>
+                    <select id="sort-order">
+                        <option value="asc">Crescente</option>
+                        <option value="desc">Decrescente</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" id="apply-sort-btn">Applica Ordinamento</button>
+            </div>
+        </div>
+
+        <div class="conflict-warning" id="conflict-warning">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Conflitto di date!</strong>
+            <span id="conflict-details"></span>
+        </div>
+
+        <h2 style="margin: 30px 0 20px 0;"><i class="fas fa-book"></i> I Tuoi Esami</h2>
+        <div class="exam-list" id="exam-list">
+            <!-- Gli esami verranno inseriti qui dinamicamente -->
+        </div>
+    </main>
+
+    <footer>
+        <p>Organizzatore Esami Universitari - WebApp Personale</p>
+        <p>Salva questa pagina sul tuo dispositivo per accedervi offline</p>
+    </footer>
+
+    <!-- Modale Esportazione -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-download"></i> Esporta Dati</h2>
+            <p>Puoi esportare i tuoi dati in due modi:</p>
+
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="copy">Copia negli Appunti</button>
+                    <button class="tab-btn" data-tab="download">Scarica File</button>
+                </div>
+
+                <div class="tab-content active" id="copy-tab">
+                    <p>Copia il seguente testo e incollalo in un'app di note per salvarlo:</p>
+                    <textarea id="export-data"
+                        style="width: 100%; height: 150px; margin: 15px 0; padding: 10px;"></textarea>
+                    <button class="btn-primary" id="copy-btn"><i class="fas fa-copy"></i> Copia negli Appunti</button>
+                </div>
+
+                <div class="tab-content" id="download-tab">
+                    <p>Clicca il pulsante qui sotto per scaricare un file con tutti i tuoi dati:</p>
+                    <button class="btn-primary" id="download-btn" style="margin-top: 15px;">
+                        <i class="fas fa-file-download"></i> Scarica File Dati
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-secondary" id="close-export-modal" style="margin-top: 20px;">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Modale Importazione -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-upload"></i> Importa Dati</h2>
+            <p>Puoi importare i tuoi dati in due modi:</p>
+
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="paste">Incolla Dati</button>
+                    <button class="tab-btn" data-tab="upload">Carica File</button>
+                </div>
+
+                <div class="tab-content active" id="paste-tab">
+                    <p>Incolla qui i dati che hai precedentemente esportato:</p>
+                    <textarea id="import-data" style="width: 100%; height: 150px; margin: 15px 0; padding: 10px;"
+                        placeholder="Incolla qui i dati JSON..."></textarea>
+                    <div class="import-actions">
+                        <button class="btn-primary" id="import-paste-btn"><i class="fas fa-file-import"></i> Importa
+                            Dati</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="upload-tab">
+                    <p>Seleziona il file dati che hai precedentemente scaricato:</p>
+                    <input type="file" id="import-file" accept=".json,text/json"
+                        style="margin: 15px 0; padding: 10px; width: 100%;">
+                    <div class="import-actions">
+                        <button class="btn-primary" id="import-file-btn"><i class="fas fa-file-upload"></i> Carica e
+                            Importa</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="import-warning" id="import-warning" style="color: #e74c3c; margin-top: 15px; display: none;">
+                <i class="fas fa-exclamation-triangle"></i> <span id="import-warning-text"></span>
+            </div>
+
+            <button class="btn-secondary" id="close-import-modal" style="margin-top: 20px;">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Modale Configurazione -->
+    <div class="modal" id="config-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-cog"></i> Configurazione Sincronizzazione</h2>
+            <div class="form-group">
+                <label for="dropbox-app-key">La tua Dropbox App Key</label>
+                <input type="text" id="dropbox-app-key" placeholder="Inserisci la tua App Key">
+                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                    <a href="#" id="dropbox-help-link">Come ottenere la App Key</a>
+                </p>
+            </div>
+            <div class="form-group">
+                <button class="btn-primary" id="save-config-btn">Salva Configurazione</button>
+                <button class="btn-secondary" id="close-config-modal">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Includi Dropbox SDK -->
+    <script src="https://unpkg.com/dropbox@2.5.13/dist/Dropbox-sdk.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inizializzazione variabili
+            let exams = JSON.parse(localStorage.getItem('exams')) || [];
+            let currentDates = [];
+            let editingExamId = null;
+            let dbx = null;
+            let userDropboxAppKey = localStorage.getItem('userDropboxAppKey') || '';
+
+            const examList = document.getElementById('exam-list');
+            const saveExamBtn = document.getElementById('save-exam-btn');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const addDateBtn = document.getElementById('add-date-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+            const dropboxAuthBtn = document.getElementById('dropbox-auth-btn');
+            const closeExportModal = document.getElementById('close-export-modal');
+            const exportModal = document.getElementById('export-modal');
+            const importModal = document.getElementById('import-modal');
+            const closeImportModal = document.getElementById('close-import-modal');
+            const exportData = document.getElementById('export-data');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const importPasteBtn = document.getElementById('import-paste-btn');
+            const importFileBtn = document.getElementById('import-file-btn');
+            const importData = document.getElementById('import-data');
+            const importFile = document.getElementById('import-file');
+            const applySortBtn = document.getElementById('apply-sort-btn');
+            const conflictWarning = document.getElementById('conflict-warning');
+            const conflictDetails = document.getElementById('conflict-details');
+            const importWarning = document.getElementById('import-warning');
+            const importWarningText = document.getElementById('import-warning-text');
+            const formTitle = document.getElementById('form-title');
+            const syncStatus = document.getElementById('sync-status');
+            const syncIcon = document.getElementById('sync-icon');
+            const syncMessage = document.getElementById('sync-message');
+
+            // All'avvio, se abbiamo una chiave, usiamola per inizializzare Dropbox
+            if (userDropboxAppKey) {
+                // Inizializza Dropbox con la chiave salvata
+                initializeDropbox(userDropboxAppKey);
+            }
+
+            // Apri modale configurazione
+            document.getElementById('config-btn').addEventListener('click', function () {
+                document.getElementById('dropbox-app-key').value = userDropboxAppKey;
+                document.getElementById('config-modal').classList.add('show');
+            });
+
+            // Chiudi modale configurazione
+            document.getElementById('close-config-modal').addEventListener('click', function () {
+                document.getElementById('config-modal').classList.remove('show');
+            });
+
+            // Salva configurazione
+            document.getElementById('save-config-btn').addEventListener('click', function () {
+                const appKey = document.getElementById('dropbox-app-key').value.trim();
+                if (appKey) {
+                    userDropboxAppKey = appKey;
+                    localStorage.setItem('userDropboxAppKey', appKey);
+                    alert('Configurazione salvata! Ora puoi connetterti a Dropbox.');
+                    document.getElementById('config-modal').classList.remove('show');
+
+                    // Riinizializza Dropbox con la nuova chiave
+                    if (dbx) {
+                        initializeDropbox(appKey);
+                    }
+                } else {
+                    alert('Inserisci una App Key valida.');
+                }
+            });
+
+            // Aiuto per ottenere la App Key
+            document.getElementById('dropbox-help-link').addEventListener('click', function (e) {
+                e.preventDefault();
+                alert("Per ottenere la tua App Key:\n1. Vai su https://www.dropbox.com/developers/apps\n2. Clicca 'Create App'\n3. Scegli 'Scoped Access' > 'Full Dropbox'\n4. Inserisci un nome per la tua app\n5. Copia la 'App Key' e incollala qui");
+            });
+
+            // Gestione tabs
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const tab = this.dataset.tab;
+
+                    // Disattiva tutti i tab
+                    this.parentElement.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Attiva il tab cliccato
+                    this.classList.add('active');
+
+                    // Nascondi tutti i contenuti
+                    this.closest('.tab-container').querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Mostra il contenuto corretto
+                    document.getElementById(`${tab}-tab`).classList.add('active');
+                });
+            });
+
+            // Carica gli esami all'avvio
+            renderExams();
+            checkForConflicts();
+
+            // Autenticazione Dropbox
+            dropboxAuthBtn.addEventListener('click', function () {
+                if (dropboxAccessToken) {
+                    // Disconnetti
+                    localStorage.removeItem('dropboxAccessToken');
+                    dropboxAccessToken = null;
+                    dbx = null;
+                    updateSyncStatus('Disconnesso da Dropbox', 'error');
+                    this.innerHTML = '<i class="fab fa-dropbox"></i> Connetti Dropbox';
+                } else {
+                    // Connetti
+                    authenticateDropbox();
+                }
+            });
+
+            // Aggiungi data all'esame
+            addDateBtn.addEventListener('click', function () {
+                const dateInput = document.getElementById('exam-date-input');
+                if (dateInput.value) {
+                    currentDates.push(dateInput.value);
+                    renderDatesList();
+                    dateInput.value = '';
+                }
+            });
+
+            // Salva o modifica esame
+            saveExamBtn.addEventListener('click', function () {
+                const name = document.getElementById('exam-name').value;
+                const semester = document.getElementById('exam-semester').value;
+                const cfu = document.getElementById('exam-cfu').value;
+                const type = document.getElementById('exam-type').value;
+                const exoneration = document.getElementById('exam-exoneration').value;
+                const notes = document.getElementById('exam-notes').value;
+
+                if (!name || !cfu || currentDates.length === 0) {
+                    alert('Compila tutti i campi obbligatori: nome, CFU e almeno una data');
+                    return;
+                }
+
+                if (editingExamId) {
+                    // Modifica esame esistente
+                    const examIndex = exams.findIndex(exam => exam.id === editingExamId);
+                    if (examIndex !== -1) {
+                        exams[examIndex] = {
+                            id: editingExamId,
+                            name,
+                            semester: parseInt(semester),
+                            cfu: parseInt(cfu),
+                            type,
+                            exoneration: parseInt(exoneration),
+                            notes,
+                            dates: [...currentDates]
+                        };
+                    }
+                } else {
+                    // Aggiungi nuovo esame
+                    const newExam = {
+                        id: Date.now(),
+                        name,
+                        semester: parseInt(semester),
+                        cfu: parseInt(cfu),
+                        type,
+                        exoneration: parseInt(exoneration),
+                        notes,
+                        dates: [...currentDates]
+                    };
+
+                    exams.push(newExam);
+                }
+
+                saveExams();
+                renderExams();
+                checkForConflicts();
+                resetForm();
+                cancelEdit();
+
+                // Sincronizza con Dropbox
+                if (dbx) {
+                    syncWithDropbox();
+                }
+            });
+
+            // Annulla modifica
+            cancelEditBtn.addEventListener('click', function () {
+                resetForm();
+                cancelEdit();
+            });
+
+            // Applica filtri
+            document.querySelectorAll('.filters select, #filter-cfu').forEach(element => {
+                element.addEventListener('change', renderExams);
+            });
+
+            // Apri modale esportazione
+            exportBtn.addEventListener('click', function () {
+                exportData.value = JSON.stringify(exams, null, 2);
+                exportModal.classList.add('show');
+            });
+
+            // Chiudi modale esportazione
+            closeExportModal.addEventListener('click', function () {
+                exportModal.classList.remove('show');
+            });
+
+            // Apri modale importazione
+            importBtn.addEventListener('click', function () {
+                importModal.classList.add('show');
+                importWarning.style.display = 'none';
+            });
+
+            // Chiudi modale importazione
+            closeImportModal.addEventListener('click', function () {
+                importModal.classList.remove('show');
+            });
+
+            // Copia dati negli appunti
+            copyBtn.addEventListener('click', function () {
+                exportData.select();
+                document.execCommand('copy');
+                alert('Dati copiati negli appunti!');
+            });
+
+            // Scarica file dati
+            downloadBtn.addEventListener('click', function () {
+                const dataStr = JSON.stringify(exams, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+                const exportFileDefaultName = 'esami-universitari.json';
+
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            });
+
+            // Importa dati da textarea
+            importPasteBtn.addEventListener('click', function () {
+                try {
+                    const data = JSON.parse(importData.value);
+                    if (Array.isArray(data)) {
+                        exams = data;
+                        saveExams();
+                        renderExams();
+                        checkForConflicts();
+                        importModal.classList.remove('show');
+                        alert('Dati importati con successo!');
+
+                        // Sincronizza con Dropbox
+                        if (dbx) {
+                            syncWithDropbox();
+                        }
+                    } else {
+                        throw new Error('Formato dati non valido');
+                    }
+                } catch (error) {
+                    importWarningText.textContent = 'Errore durante l\'importazione: ' + error.message;
+                    importWarning.style.display = 'block';
+                }
+            });
+
+            // Importa dati da file
+            importFileBtn.addEventListener('click', function () {
+                const file = importFile.files[0];
+                if (!file) {
+                    importWarningText.textContent = 'Seleziona un file per importare';
+                    importWarning.style.display = 'block';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (Array.isArray(data)) {
+                            exams = data;
+                            saveExams();
+                            renderExams();
+                            checkForConflicts();
+                            importModal.classList.remove('show');
+                            alert('Dati importati con successo!');
+
+                            // Sincronizza con Dropbox
+                            if (dbx) {
+                                syncWithDropbox();
+                            }
+                        } else {
+                            throw new Error('Formato dati non valido');
+                        }
+                    } catch (error) {
+                        importWarningText.textContent = 'Errore durante l\'importazione: ' + error.message;
+                        importWarning.style.display = 'block';
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Applica ordinamento
+            applySortBtn.addEventListener('click', renderExams);
+
+            // Funzione per autenticazione Dropbox
+            function authenticateDropbox() {
+                if (!userDropboxAppKey) {
+                    alert('Prima configura la tua App Key nel pannello di configurazione.');
+                    document.getElementById('config-modal').classList.add('show');
+                    return;
+                }
+
+                const authUrl = 'https://www.dropbox.com/oauth2/authorize?' +
+                    'client_id=' + userDropboxAppKey +
+                    '&response_type=token' +
+                    '&redirect_uri=' + encodeURIComponent(window.location.href.split('?')[0]);
+
+                window.location.href = authUrl;
+            }
+
+            // Funzione per inizializzare Dropbox
+            function initializeDropbox(token) {
+                dbx = new Dropbox.Dropbox({ accessToken: token });
+
+                // Carica i dati da Dropbox all'avvio
+                loadFromDropbox();
+            }
+
+            // Funzione per caricare i dati da Dropbox
+            function loadFromDropbox() {
+                if (!dbx) return;
+
+                updateSyncStatus('Sincronizzazione in corso...', 'syncing');
+
+                dbx.filesDownload({ path: '/esami-universitari.json' })
+                    .then(function (response) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            try {
+                                const data = JSON.parse(e.target.result);
+                                if (Array.isArray(data)) {
+                                    exams = data;
+                                    saveExams();
+                                    renderExams();
+                                    checkForConflicts();
+                                    updateSyncStatus('Dati sincronizzati con Dropbox', 'success');
+                                }
+                            } catch (error) {
+                                console.error('Errore nel parsing dei dati da Dropbox:', error);
+                                updateSyncStatus('Errore nei dati di Dropbox', 'error');
+                            }
+                        };
+                        reader.readAsText(response.fileBlob);
+                    })
+                    .catch(function (error) {
+                        if (error.status === 409) {
+                            // File non trovato, ne creeremo uno nuovo al prossimo salvataggio
+                            updateSyncStatus('Pronto per sincronizzare', 'success');
+                        } else {
+                            console.error('Errore nel caricamento da Dropbox:', error);
+                            updateSyncStatus('Errore di connessione a Dropbox', 'error');
+                        }
+                    });
+            }
+
+            // Funzione per sincronizzare con Dropbox
+            function syncWithDropbox() {
+                if (!dbx) return;
+
+                updateSyncStatus('Sincronizzazione in corso...', 'syncing');
+
+                const dataStr = JSON.stringify(exams, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+
+                dbx.filesUpload({
+                    path: '/esami-universitari.json',
+                    contents: blob,
+                    mode: { '.tag': 'overwrite' }
+                })
+                    .then(function (response) {
+                        updateSyncStatus('Dati sincronizzati con Dropbox', 'success');
+                    })
+                    .catch(function (error) {
+                        console.error('Errore nel salvataggio su Dropbox:', error);
+                        updateSyncStatus('Errore di sincronizzazione', 'error');
+                    });
+            }
+
+            // Funzione per aggiornare lo stato della sincronizzazione
+            function updateSyncStatus(message, status) {
+                syncMessage.textContent = message;
+                syncStatus.className = 'sync-status ' + status;
+
+                switch (status) {
+                    case 'syncing':
+                        syncIcon.className = 'fas fa-sync-alt icon fa-spin';
+                        break;
+                    case 'success':
+                        syncIcon.className = 'fas fa-check-circle icon';
+                        break;
+                    case 'error':
+                        syncIcon.className = 'fas fa-exclamation-triangle icon';
+                        break;
+                    default:
+                        syncIcon.className = 'fas fa-cloud icon';
+                }
+            }
+
+            // Funzione per visualizzare gli esami
+            function renderExams() {
+                // Applica filtri
+                let filteredExams = [...exams];
+                const semesterFilter = document.getElementById('filter-semester').value;
+                const exonerationFilter = document.getElementById('filter-exoneration').value;
+                const typeFilter = document.getElementById('filter-type').value;
+                const cfuFilter = parseInt(document.getElementById('filter-cfu').value);
+
+                if (semesterFilter !== 'all') {
+                    filteredExams = filteredExams.filter(exam => exam.semester === parseInt(semesterFilter));
+                }
+
+                if (exonerationFilter !== 'all') {
+                    filteredExams = filteredExams.filter(exam =>
+                        exonerationFilter === 'yes' ? exam.exoneration > 0 : exam.exoneration === 0
+                    );
+                }
+
+                if (typeFilter !== 'all') {
+                    filteredExams = filteredExams.filter(exam => exam.type === typeFilter);
+                }
+
+                if (cfuFilter > 0) {
+                    filteredExams = filteredExams.filter(exam => exam.cfu >= cfuFilter);
+                }
+
+                // Applica ordinamento
+                const primarySort = document.getElementById('sort-primary').value;
+                const secondarySort = document.getElementById('sort-secondary').value;
+                const sortOrder = document.getElementById('sort-order').value;
+
+                filteredExams.sort((a, b) => {
+                    let compareA, compareB;
+
+                    // Ordinamento primario
+                    if (primarySort === 'name') {
+                        compareA = a.name.toLowerCase();
+                        compareB = b.name.toLowerCase();
+                    } else if (primarySort === 'date') {
+                        compareA = new Date(a.dates[0]);
+                        compareB = new Date(b.dates[0]);
+                    } else if (primarySort === 'cfu') {
+                        compareA = a.cfu;
+                        compareB = b.cfu;
+                    }
+
+                    let result = 0;
+                    if (compareA < compareB) result = -1;
+                    if (compareA > compareB) result = 1;
+
+                    // Se c'è un pareggio e è stato specificato un ordinamento secondario
+                    if (result === 0 && secondarySort !== 'none') {
+                        if (secondarySort === 'name') {
+                            compareA = a.name.toLowerCase();
+                            compareB = b.name.toLowerCase();
+                        } else if (secondarySort === 'date') {
+                            compareA = new Date(a.dates[0]);
+                            compareB = new Date(b.dates[0]);
+                        } else if (secondarySort === 'cfu') {
+                            compareA = a.cfu;
+                            compareB = b.cfu;
+                        }
+
+                        if (compareA < compareB) result = -1;
+                        if (compareA > compareB) result = 1;
+                    }
+
+                    return sortOrder === 'asc' ? result : -result;
+                });
+
+                // Renderizza gli esami
+                examList.innerHTML = '';
+
+                if (filteredExams.length === 0) {
+                    examList.innerHTML = '<div class="card"><p>Nessun esame corrisponde ai filtri selezionati</p></div>';
+                    return;
+                }
+
+                filteredExams.forEach(exam => {
+                    const examCard = document.createElement('div');
+                    examCard.className = `exam-card ${exam.type}`;
+
+                    let typeText = '';
+                    if (exam.type === 'written') typeText = 'Solo Scritto';
+                    if (exam.type === 'oral') typeText = 'Solo Orale';
+                    if (exam.type === 'both') typeText = 'Scritto + Orale';
+
+                    let exonerationText = '';
+                    if (exam.exoneration > 0) {
+                        exonerationText = `${exam.exoneration} esonero${exam.exoneration > 1 ? 'i' : ''}`;
+                    }
+
+                    let datesHtml = '';
+                    exam.dates.forEach(date => {
+                        const formattedDate = new Date(date).toLocaleDateString('it-IT');
+                        datesHtml += `<span class="date-badge">${formattedDate}</span>`;
+                    });
+
+                    examCard.innerHTML = `
+                        <div class="exam-header">
+                            <div class="exam-name">${exam.name}</div>
+                            <div class="exam-cfu">${exam.cfu} CFU</div>
+                        </div>
+                        <div class="exam-details">
+                            <div class="exam-detail">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Semestre: ${exam.semester}</span>
+                            </div>
+                            <div class="exam-detail">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Modalità: ${typeText}</span>
+                            </div>
+                            <div class="exam-detail">
+                                <i class="fas fa-tasks"></i>
+                                <span>Esoneri: ${exam.exoneration > 0 ? exonerationText : 'Nessuno'}</span>
+                            </div>
+                            ${exam.notes ? `
+                            <div class="exam-detail">
+                                <i class="fas fa-sticky-note"></i>
+                                <span>Note: ${exam.notes}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="exam-dates">
+                            <strong>Date appelli:</strong><br>
+                            ${datesHtml}
+                        </div>
+                        <div class="exam-actions">
+                            <button class="btn-warning" onclick="editExam(${exam.id})">
+                                <i class="fas fa-edit"></i> Modifica
+                            </button>
+                            <button class="btn-danger" onclick="deleteExam(${exam.id})">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </div>
+                    `;
+
+                    examList.appendChild(examCard);
+                });
+            }
+
+            // Funzione per modificare un esame
+            window.editExam = function (id) {
+                const exam = exams.find(exam => exam.id === id);
+                if (!exam) return;
+
+                // Compila il form con i dati dell'esame
+                document.getElementById('exam-name').value = exam.name;
+                document.getElementById('exam-semester').value = exam.semester;
+                document.getElementById('exam-cfu').value = exam.cfu;
+                document.getElementById('exam-type').value = exam.type;
+                document.getElementById('exam-exoneration').value = exam.exoneration;
+                document.getElementById('exam-notes').value = exam.notes || '';
+
+                // Imposta le date
+                currentDates = [...exam.dates];
+                renderDatesList();
+
+                // Imposta la modalità di modifica
+                editingExamId = id;
+                formTitle.textContent = 'Modifica Esame';
+                saveExamBtn.textContent = 'Salva Modifiche';
+                cancelEditBtn.style.display = 'block';
+
+                // Scrolla verso il form
+                document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+            };
+
+            // Funzione per annullare la modifica
+            function cancelEdit() {
+                editingExamId = null;
+                formTitle.textContent = 'Aggiungi Nuovo Esame';
+                saveExamBtn.textContent = 'Aggiungi Esame';
+                cancelEditBtn.style.display = 'none';
+            }
+
+            // Funzione per verificare conflitti di date
+            function checkForConflicts() {
+                let allDates = [];
+                let conflictMessages = [];
+
+                // Raccogli tutte le date
+                exams.forEach(exam => {
+                    exam.dates.forEach(date => {
+                        allDates.push({
+                            date,
+                            examName: exam.name,
+                            formattedDate: new Date(date).toLocaleDateString('it-IT')
+                        });
+                    });
+                });
+
+                // Cerca duplicati
+                let seenDates = {};
+                allDates.forEach(item => {
+                    if (seenDates[item.date]) {
+                        if (!conflictMessages.includes(`L'esame "${item.examName}" ha date in conflitto con "${seenDates[item.date]}" il ${item.formattedDate}`)) {
+                            conflictMessages.push(`L'esame "${item.examName}" ha date in conflitto con "${seenDates[item.date]}" il ${item.formattedDate}`);
+                        }
+                    } else {
+                        seenDates[item.date] = item.examName;
+                    }
+                });
+
+                // Mostra avviso se ci sono conflitti
+                if (conflictMessages.length > 0) {
+                    conflictDetails.innerHTML = conflictMessages.join('<br>');
+                    conflictWarning.classList.add('show');
+                } else {
+                    conflictWarning.classList.remove('show');
+                }
+            }
+
+            // Funzione per salvare gli esami nel localStorage
+            function saveExams() {
+                localStorage.setItem('exams', JSON.stringify(exams));
+            }
+
+            // Funzione per resettare il form
+            function resetForm() {
+                document.getElementById('exam-name').value = '';
+                document.getElementById('exam-cfu').value = '';
+                document.getElementById('exam-notes').value = '';
+                currentDates = [];
+                renderDatesList();
+            }
+
+            // Funzione per visualizzare le date aggiunte
+            function renderDatesList() {
+                const datesList = document.getElementById('dates-list');
+                datesList.innerHTML = '';
+
+                currentDates.forEach((date, index) => {
+                    const formattedDate = new Date(date).toLocaleDateString('it-IT');
+                    const dateElement = document.createElement('div');
+                    dateElement.innerHTML = `
+                        <span>${formattedDate}</span>
+                        <button class="btn-danger" style="padding: 2px 5px; margin-left: 10px;" onclick="removeDate(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    datesList.appendChild(dateElement);
+                });
+            }
+
+            // Rendere le funzioni disponibili globalmente
+            window.deleteExam = function (id) {
+                if (confirm('Sei sicuro di voler eliminare questo esame?')) {
+                    exams = exams.filter(exam => exam.id !== id);
+                    saveExams();
+                    renderExams();
+                    checkForConflicts();
+
+                    // Se stavi modificando l'esame eliminato, annulla la modifica
+                    if (editingExamId === id) {
+                        cancelEdit();
+                        resetForm();
+                    }
+
+                    // Sincronizza con Dropbox
+                    if (dbx) {
+                        syncWithDropbox();
+                    }
+                }
+            };
+
+            window.removeDate = function (index) {
+                currentDates.splice(index, 1);
+                renderDatesList();
+            };
+
+            // Gestione del token di accesso di Dropbox dall'URL
+            function getAccessTokenFromUrl() {
+                const hashParams = window.location.hash.substring(1).split('&');
+                for (const param of hashParams) {
+                    const [key, value] = param.split('=');
+                    if (key === 'access_token') {
+                        return decodeURIComponent(value);
+                    }
+                }
+                return null;
+            }
+
+            // Verifica se c'è un token di accesso nell'URL (dopo il reindirizzamento di OAuth)
+            const accessToken = getAccessTokenFromUrl();
+            if (accessToken) {
+                dropboxAccessToken = accessToken;
+                localStorage.setItem('dropboxAccessToken', accessToken);
+                initializeDropbox(accessToken);
+                updateSyncStatus('Connesso a Dropbox', 'success');
+                dropboxAuthBtn.innerHTML = '<i class="fab fa-dropbox"></i> Disconnetti Dropbox';
+
+                // Rimuovi il token dall'URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+
+</body>
+
+</html>
